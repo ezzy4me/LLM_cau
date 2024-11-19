@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f7f7f7;
+        }
+        .chat-box {
+            width: 400px;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        .message-box {
+            border: 1px solid #ccc;
+            padding: 10px;
+            border-radius: 5px;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        .btn {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-box">
+        <div id="chat-container">
+            <!-- Chat messages will appear here -->
+        </div>
+        <input type="text" id="user-input" class="message-box" placeholder="Ask your question..." />
+        <button id="send-btn" class="btn">Send</button>
+    </div>
+    <script>
+        // 페이지 로드 시 자동으로 초기 메시지 출력
+        window.onload = async function() {
+            const chatContainer = document.getElementById("chat-container");
+            chatContainer.innerHTML += `<p><strong>Bot:</strong> 무엇을 도와드릴까요?</p>`;
+        };
+
+        document.getElementById("send-btn").onclick = async function() {
+            const input = document.getElementById("user-input").value;
+            const response = await fetch("/ask", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ question: input })
+            });
+            const result = await response.json();
+            const chatContainer = document.getElementById("chat-container");
+            chatContainer.innerHTML += `<p><strong>You:</strong> ${input}</p>`;
+            chatContainer.innerHTML += `<p><strong>Bot:</strong> ${result.answer}</p>`;
+            document.getElementById("user-input").value = "";
+        };
+    </script>
+</body>
+</html>
