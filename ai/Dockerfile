@@ -1,13 +1,13 @@
-FROM python:3.8-slim-buster
+# AI 백엔드
+FROM python:3.9-slim
+WORKDIR /app
 
-# set a directory for the app
-WORKDIR /
+# 종속성 설치
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt --ignore-installed
 
-# copy all the files to the container
+# 소스 코드 복사
 COPY . .
-
-# install dependencies
-RUN pip install --no-cache-dir -r requirements.txt
 
 # tell the port number the container should expose
 EXPOSE 5000
