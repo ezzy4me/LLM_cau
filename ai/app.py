@@ -8,9 +8,13 @@ from langchain_community.document_loaders import PyPDFLoader
 from langchain.text_splitter import TokenTextSplitter
 from langchain_openai import OpenAIEmbeddings
 from pydantic import BaseModel  # pydantic v2 사용
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = Flask(__name__)
-openai_key = os.getenv("OPENAI_API_KEY")
+
+openai_key = os.getenv("OPEN_API_KEY")
 
 def load_pdf_and_split(pdf_path):
     loader = PyPDFLoader(pdf_path)
@@ -22,6 +26,8 @@ def load_pdf_and_split(pdf_path):
     split_data = text_splitter.split_documents(pdf_data)
     print(f"분할된 청크 수: {len(split_data)}")  # 분할된 청크 수 확인
     return split_data
+
+
 
 def setup_embeddings_and_chroma():
     embeddings = OpenAIEmbeddings(openai_api_key=openai_key)
@@ -43,6 +49,9 @@ def setup_embeddings_and_chroma():
     return vectDB
 
 
+
+
+
 def setup_conversational_chain():
     vectDB = setup_embeddings_and_chroma()
     retriever = vectDB.as_retriever(search_type='similarity', search_kwargs={'k': 5})
@@ -60,28 +69,22 @@ def setup_conversational_chain():
     )
     return chatQA
 
-@app.route('/ask', methods=['POST'])
-def ask_question():
-    data = request.get_json()
-    question = data['question']
 
+
+@app.route('/query', methods=['POST'])
+def return_answer() :
+    question = request.get_json()["question"]
+    print(question)
     # 특정 질문에 대해 미리 정의된 응답
     if "무엇을 도와줄 수 있나요?" in question:
         return jsonify({"answer": "2024 중앙대학교 수시모집요강을 알려드릴 수 있습니다."})
-    
-    chatQA = setup_conversational_chain()
-    response = chatQA({"question": question, "chat_history": []})
-
-    # 응답과 함께 검색된 문서의 내용을 반환
-    # print("검색된 문서의 내용: ")
-    # for doc in response["source_document"]:
-    #     print(doc.page_content[:200])
+    try :
+        chatQA = setup_conversational_chain()
+        response = chatQA({"question": question, "chat_history": []})
+    except :
+        response = {"answer" : "this is just a test code when you don't have any extra token"}
 
     return jsonify({"answer": response["answer"]})
-
-@app.route('/')
-def home():
-    return render_template('index.html')
 
 if __name__ == "__main__":
     app.run(debug=True)
