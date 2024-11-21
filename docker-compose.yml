@@ -1,0 +1,19 @@
+version: '3.8'
+services:
+  ai:
+    build:
+      context: ./ai
+    ports:
+      - "5001:5000"  # AI 백엔드
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}  # 환경 변수
+
+  web:
+    build:
+      context: ./web
+    ports:
+      - "80:5001"  # 프론트엔드
+    depends_on:
+      - ai
+    environment:
+      - BACKEND_URL=http://ai:5000  # AI 컨테이너와 통신
